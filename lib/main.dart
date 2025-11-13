@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import 'views/home_view.dart';
+import 'package:provider/provider.dart';
+import 'package:random_teams/viewmodel/jogador_viewmodel.dart';
+import 'view/home_view.dart';
 
 void main() {
-  runApp(const SorteadorApp());
+  runApp(ChangeNotifierProvider(
+    create: (_) => JogadorViewModel(),
+    child: const SorteadorApp()
+  ));
 }
 
 class SorteadorApp extends StatelessWidget {
