@@ -1,16 +1,68 @@
-# random_teams
+# Gerenciador de times
 
-A new Flutter project.
+Um aplicativo Flutter simples e intuitivo para **gerenciar jogadores** e
+**sortear times** automaticamente. Ideal para jogos de futebol,
+basquete, vôlei ou qualquer atividade esportiva que envolva equipes
+equilibradas.
 
-## Getting Started
+------------------------------------------------------------------------
 
-This project is a starting point for a Flutter application.
+## Funcionalidades
 
-A few resources to get you started if this is your first Flutter project:
+### Gerenciamento de Jogadores
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+-   Adicionar jogadores com nome.
+-   Remover jogadores.
+-   Visualizar lista completa de participantes.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Sorteio de Times
+
+-   Define automaticamente duas equipes equilibradas.
+-   Embaralha jogadores utilizando algoritmos simples de randomização.
+-   Exibe os times formados na tela de forma clara.
+
+------------------------------------------------------------------------
+
+## Estrutura do Projeto
+
+    lib/
+     ├── main.dart
+     ├── view/
+     │    ├── home_view.dart
+     │    ├── jogadores_view.dart
+     │    ├── sorteio_view.dart
+     ├── viewmodel/
+     │    ├── jogador_viewmodel.dart
+     │    ├── sorteio_viewmodel.dart
+     ├── model/
+     │    └── jogador.dart
+
+------------------------------------------------------------------------
+
+## Identidade Visual
+
+-   Logo minimalista voltada à prática de esportes.
+-   Nome do app configurado via
+    `android/app/src/main/AndroidManifest.xml` e
+    `ios/Runner/Info.plist`.
+
+------------------------------------------------------------------------
+
+## Tecnologias Utilizadas
+
+-   **Flutter**
+-   **Provider (State Management)**
+-   **Dart**
+-   **Material Design**
+
+------------------------------------------------------------------------
+
+## 📦 Estrutura de Diretórios Recomendada
+
+    lib/
+     ├── model/
+     ├── view/
+     ├── viewmodel/
+     ├── widgets/
+
+------------------------------------------------------------------------
