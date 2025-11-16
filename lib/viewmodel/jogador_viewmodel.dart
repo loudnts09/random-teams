@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../model/jogador.dart';
 import '../repository/jogador_repository.dart';
+import 'dart:developer';
 
 class JogadorViewModel extends ChangeNotifier {
   final JogadorRepository _repository = JogadorRepository();
@@ -12,28 +13,83 @@ class JogadorViewModel extends ChangeNotifier {
   bool get carregando => _carregando;
 
   Future<void> carregarJogadores() async {
-    _carregando = true;
-    notifyListeners();
+    try{
+      log("carregando jogadores");
+      _carregando = true;
+      notifyListeners();
 
-    _jogadores = await _repository.listar();
-
-    _carregando = false;
-    notifyListeners();
+      _jogadores = await _repository.listar();
+    }
+    catch(e, s){
+      log("erro ao carregar jogadores ", error: e, stackTrace: s);
+    }
+    finally{
+      _carregando = false;
+      notifyListeners();
+    }
   }
 
   Future<void> adicionarJogador(String nome) async {
-    final novo = Jogador(nome: nome);
-    await _repository.inserir(novo);
-    await carregarJogadores();
+    if(nome.trim().isEmpty){
+      log("o nome não pode estar vazio");
+      return;
+    }
+
+    try{
+      log("adicionando jogadores");
+      _carregando = true;
+      notifyListeners();
+
+      final novo = Jogador(nome: nome);
+      await _repository.inserir(novo);
+      log("jogador inserido com sucesso");
+    }
+    catch(e, s){
+      log("erro ao adicionar jogadores", error: e, stackTrace: s);
+    }
+    finally{
+      _carregando = false;
+      notifyListeners();
+      await carregarJogadores();
+    }
   }
 
   Future<void> atualizarJogador(Jogador jogador) async {
-    await _repository.atualizar(jogador);
-    await carregarJogadores();
+    if(jogador.nome.trim().isEmpty){
+      log("o nome não pode estar vazio");
+      return;
+    }
+    try{
+      log("atualizando jogador id=${jogador.id}");
+      _carregando = true;
+      notifyListeners();
+      await _repository.atualizar(jogador);
+    }
+    catch(e, s){
+      log("erro ao atualizar jogador", error: e, stackTrace: s);
+    }
+    finally{
+      _carregando = false;
+      notifyListeners();
+      await carregarJogadores();
+    }
   }
 
   Future<void> excluirJogador(int id) async {
-    await _repository.excluir(id);
-    await carregarJogadores();
+    try{
+      log("excluindo jogador id=$id");
+      _carregando = true;
+      notifyListeners();
+      await _repository.excluir(id);
+    }
+    catch(e, s){
+      log("erro ao excluir jogador", error: e, stackTrace: s);
+    }
+    finally{
+      _carregando = false;
+      notifyListeners();
+      
+      await carregarJogadores();
+    }
   }
 }
