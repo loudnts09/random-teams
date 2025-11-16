@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'jogadores_view.dart';
 import 'sorteio_view.dart';
+import 'dart:developer';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    log("HomeView build chamado");
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
@@ -21,6 +23,7 @@ class HomeView extends StatelessWidget {
             children: [
               ElevatedButton.icon(
                 onPressed: () {
+                  log("botão de gerenciar jogadores pressionado");
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const JogadoresView()),
@@ -35,6 +38,7 @@ class HomeView extends StatelessWidget {
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 onPressed: () {
+                  log("botão de sortear times pressionado");
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const SorteioView()),
