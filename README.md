@@ -5,9 +5,12 @@ Um aplicativo Flutter simples e intuitivo para **gerenciar jogadores** e
 basquete, vôlei ou qualquer atividade esportiva que envolva equipes
 equilibradas.
 
-<img src="./assets/random_teams.jpg" width="100">
-<img src="./assets/random_teams_jogadores.jpg" width="100">
-<img src="./assets/random_teams_sorteado.jpg" width="100">
+<p align="center">
+  <img src="./assets/random_teams.jpg" width="220">
+  <img src="./assets/random_teams_jogadores.jpg" width="220">
+  <img src="./assets/random_teams_sorteado.jpg" width="220">
+</p>
+
 
 ------------------------------------------------------------------------
 
