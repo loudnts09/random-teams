@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../viewmodel/jogador_viewmodel.dart';
 import '../model/jogador.dart';
 import 'dart:developer';
+import 'dart:io';
 
 class JogadoresView extends StatefulWidget {
   const JogadoresView({super.key});
@@ -28,50 +29,107 @@ class _JogadoresViewState extends State<JogadoresView> {
 
     log("abrindo diálogo para ${jogadorExistente == null ? 'adicionar' : 'editar'} jogador");
 
+    final viewModel = Provider.of<JogadorViewModel>(context, listen: false);
+    viewModel.setImagemParaEdicao(jogadorExistente?.foto);
+
+
     showDialog(
       context: context,
       builder: (dialogContext){
-        return AlertDialog(
-          title: Text(
-              jogadorExistente == null ? 'Adicionar Jogador' : 'Editar Jogador'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              labelText: 'Nome',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                log("cancelando diálogo de ${jogadorExistente == null ? 'adição' : 'edição'} de jogador");
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final nome = controller.text.trim();
-                if (nome.isNotEmpty) {
-                  final viewModel =
-                      Provider.of<JogadorViewModel>(dialogContext, listen: false);
+        final viewModel = Provider.of<JogadorViewModel>(dialogContext, listen: false);
 
-                  if (jogadorExistente == null) {
-                    log("adicionar jogador -> $nome");
-                    await viewModel.adicionarJogador(nome);
-                  } else {
-                      log("jogador -> ${jogadorExistente.nome} sendo atualizado para $nome");
-                    await viewModel.atualizarJogador(
-                      Jogador(id: jogadorExistente.id, nome: nome),
-                    );
-                  }
-                  log("fechar dialogo após ação");
-                  Navigator.pop(dialogContext);
-                }
-              },
-              child: Text(jogadorExistente == null ? 'Adicionar' : 'Salvar'),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: Text(
+                  jogadorExistente == null ? 'Adicionar Jogador' : 'Editar Jogador'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () async{
+                          await viewModel.selecionarImagem();
+                          setStateDialog(() {});
+                        },
+                        child: CircleAvatar(
+                          radius: 40,
+                          backgroundImage: viewModel.imagemSelecionada != null ? FileImage(viewModel.imagemSelecionada!) : null,
+                          child: viewModel.imagemSelecionada == null ? const Icon(Icons.camera_alt, size: 30) : null,
+                        ),
+                      ),
+                      if (viewModel.imagemSelecionada != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: TextButton.icon(
+                          onPressed: () {
+                            viewModel.removerImagem(); 
+                            setStateDialog(() {}); 
+                          },
+                          icon: const Icon(Icons.delete_outline, color: Colors.red),
+                          label: const Text(
+                            "Remover foto", 
+                            style: TextStyle(color: Colors.red),
+                          ),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(50, 30),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16,),
+                  TextField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                      labelText: 'Nome',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    log("cancelando diálogo de ${jogadorExistente == null ? 'adição' : 'edição'} de jogador");
+                    viewModel.setImagemParaEdicao(null);
+                    Navigator.pop(dialogContext);
+                  },
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final nome = controller.text.trim();
+                    if (nome.isNotEmpty) {
+                      final viewModel =
+                          Provider.of<JogadorViewModel>(dialogContext, listen: false);
+            
+                      if (jogadorExistente == null) {
+                        log("adicionar jogador -> $nome");
+                        await viewModel.adicionarJogador(nome);
+                      } else {
+                          log("jogador -> ${jogadorExistente.nome} sendo atualizado para $nome");
+                        await viewModel.atualizarJogador(
+                          Jogador(
+                            id: jogadorExistente.id,
+                            nome: nome,
+                            foto: viewModel.imagemSelecionada?.path
+                          ),
+                        );
+                      }
+                      log("fechar dialogo após ação");
+                      viewModel.setImagemParaEdicao(null);
+                      Navigator.pop(dialogContext);
+                    }
+                  },
+                  child: Text(jogadorExistente == null ? 'Adicionar' : 'Salvar'),
+                ),
+              ],
+            );
+          }
         );
       }
     );
@@ -148,8 +206,9 @@ class _JogadoresViewState extends State<JogadoresView> {
                       final jogador = viewModel.jogadores[index];
                       return Card(
                         child: ListTile(
-                          leading: const CircleAvatar(
-                            child: Icon(Icons.person),
+                          leading: CircleAvatar(
+                            backgroundImage: jogador.foto != null ? FileImage(File(jogador.foto!)) : null,
+                            child: jogador.foto == null ? const Icon(Icons.person) : null,
                           ),
                           title: Text(jogador.nome),
                           trailing: Row(

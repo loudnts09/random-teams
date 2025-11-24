@@ -1,16 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:developer';
+import 'dart:io';
 import '../model/jogador.dart';
 import '../repository/jogador_repository.dart';
-import 'dart:developer';
 
 class JogadorViewModel extends ChangeNotifier {
   final JogadorRepository _repository = JogadorRepository();
+  final picker = ImagePicker();
+  
+  File? imagemSelecionada;
 
   List<Jogador> _jogadores = [];
   List<Jogador> get jogadores => _jogadores;
 
   bool _carregando = false;
   bool get carregando => _carregando;
+
+  void removerImagem(){
+    imagemSelecionada = null;
+    log("imagem removida com sucesso");
+    notifyListeners();
+  }
+  void setImagemParaEdicao(String? caminhoFoto){
+    if(caminhoFoto != null){
+      imagemSelecionada = File(caminhoFoto);
+    }
+    else{
+      imagemSelecionada = null;
+    }
+    notifyListeners();
+  }
+
+  Future<void> selecionarImagem() async{
+    final XFile? arquivo = await picker.pickImage(source: ImageSource.gallery);
+
+    if(arquivo != null){
+      imagemSelecionada = File(arquivo.path);
+      log("Imagem selecionada: ${arquivo.path}"); 
+      notifyListeners();
+    }
+  }
 
   Future<void> carregarJogadores() async {
     try{
@@ -40,7 +70,10 @@ class JogadorViewModel extends ChangeNotifier {
       _carregando = true;
       notifyListeners();
 
-      final novo = Jogador(nome: nome);
+      final novo = Jogador(
+        nome: nome,
+        foto: imagemSelecionada?.path
+      );
       await _repository.inserir(novo);
       log("jogador inserido com sucesso");
     }

@@ -32,7 +32,8 @@ class JogadorRepository {
           await db.execute('''
             CREATE TABLE jogadores (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
-              nome TEXT NOT NULL
+              nome TEXT NOT NULL,
+              foto TEXT
             )
           ''');
         },
