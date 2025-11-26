@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:random_teams/theme/app_theme.dart';
 import 'package:random_teams/viewmodel/jogador_viewmodel.dart';
 import 'view/home_view.dart';
 import 'dart:developer';
@@ -30,10 +31,9 @@ class SorteadorApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Gerador de Times',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       home: const HomeView(),
     );
   }
