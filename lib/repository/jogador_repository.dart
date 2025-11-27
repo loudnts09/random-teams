@@ -33,7 +33,8 @@ class JogadorRepository {
             CREATE TABLE jogadores (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               nome TEXT NOT NULL,
-              foto TEXT
+              foto TEXT,
+              nivel INTEGER NOT NULL
             )
           ''');
         },

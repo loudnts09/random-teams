@@ -59,7 +59,7 @@ class JogadorViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> adicionarJogador(String nome) async {
+  Future<void> adicionarJogador(String nome, int nivel) async {
     if(nome.trim().isEmpty){
       log("o nome não pode estar vazio");
       return;
@@ -72,7 +72,8 @@ class JogadorViewModel extends ChangeNotifier {
 
       final novo = Jogador(
         nome: nome,
-        foto: imagemSelecionada?.path
+        foto: imagemSelecionada?.path,
+        nivel: nivel
       );
       await _repository.inserir(novo);
       log("jogador inserido com sucesso");

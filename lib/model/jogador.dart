@@ -3,14 +3,16 @@ class Jogador {
   int? id;
   String nome;
   final String? foto;
+  int nivel;
 
-  Jogador({this.id, required this.nome, this.foto});
+  Jogador({this.id, required this.nome, this.foto, required this.nivel});
 
   Map<String, dynamic> toMap(){
     return {
       'id': id,
       'nome': nome,
       'foto': foto,
+      'nivel': nivel
     };
   }
 
@@ -18,7 +20,8 @@ class Jogador {
     return Jogador(
       id: map['id'],
       nome: map['nome'],
-      foto: map['foto']
+      foto: map['foto'],
+      nivel: map['nivel']
     );
   }
 }

@@ -13,6 +13,9 @@ class JogadoresView extends StatefulWidget {
 }
 
 class _JogadoresViewState extends State<JogadoresView> {
+  
+  int _nivelJogador = 1;
+
   @override
   void initState() {
     super.initState();
@@ -32,7 +35,9 @@ class _JogadoresViewState extends State<JogadoresView> {
     final viewModel = Provider.of<JogadorViewModel>(context, listen: false);
     viewModel.setImagemParaEdicao(jogadorExistente?.foto);
 
-
+    setState(() {
+      _nivelJogador = jogadorExistente?.nivel ?? 1;
+    });
     showDialog(
       context: context,
       builder: (dialogContext){
@@ -89,6 +94,52 @@ class _JogadoresViewState extends State<JogadoresView> {
                       border: OutlineInputBorder(),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 14.0),
+                  ),
+                  Text('Definir nível do jogador: '),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        iconSize: 30,
+                        onPressed: () {
+                          if (_nivelJogador > 1) {
+                            setStateDialog(() {
+                              _nivelJogador--;
+                              log("decrementou _nivelJogador -> $_nivelJogador");
+                            });
+                          }
+                          else{ 
+                            log("tentativa de decrementar abaixo de 1 ignorada");
+                          }
+                        },
+                        icon: const Icon(Icons.remove),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0),
+                      ),
+                      Text('$_nivelJogador'),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16.0),
+                      ),
+                      IconButton(
+                        iconSize: 30,
+                        onPressed: () {
+                          if(_nivelJogador < 5){
+                            setStateDialog(() {
+                              _nivelJogador++;
+                              log("incrementou _nivelJogador -> $_nivelJogador");
+                            });
+                          }
+                          else{ 
+                            log("tentativa de incrementar acima de 5 ignorada");
+                          }
+                        },
+                        icon: const Icon(Icons.add),
+                      ),
+                    ],
+                  )
                 ],
               ),
               actions: [
@@ -109,14 +160,15 @@ class _JogadoresViewState extends State<JogadoresView> {
             
                       if (jogadorExistente == null) {
                         log("adicionar jogador -> $nome");
-                        await viewModel.adicionarJogador(nome);
+                        await viewModel.adicionarJogador(nome, _nivelJogador);
                       } else {
                           log("jogador -> ${jogadorExistente.nome} sendo atualizado para $nome");
                         await viewModel.atualizarJogador(
                           Jogador(
                             id: jogadorExistente.id,
                             nome: nome,
-                            foto: viewModel.imagemSelecionada?.path
+                            foto: viewModel.imagemSelecionada?.path,
+                            nivel: _nivelJogador
                           ),
                         );
                       }
