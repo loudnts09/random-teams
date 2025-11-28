@@ -37,6 +37,7 @@ class JogadorRepository {
               nivel INTEGER NOT NULL
             )
           ''');
+          await _criarTabelasSorteio(db);
         },
       );
     }
@@ -44,6 +45,82 @@ class JogadorRepository {
       log("erro ao inicializar o banco", error: e, stackTrace: s);
       rethrow;
     }
+  }
+
+  Future<void> _criarTabelasSorteio(Database db) async {
+    await db.execute('''
+      CREATE TABLE sorteios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        data_hora TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE sorteio_itens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sorteio_id INTEGER NOT NULL,
+        jogador_id INTEGER NOT NULL,
+        numero_time INTEGER NOT NULL,
+        FOREIGN KEY(sorteio_id) REFERENCES sorteios(id),
+        FOREIGN KEY(jogador_id) REFERENCES jogadores(id)
+      )
+    ''');
+  }
+
+  Future<void> salvarSorteio(List<List<Jogador>> times) async {
+    final db = await database;
+    
+    await db.transaction((txn) async {
+
+      int sorteioId = await txn.insert('sorteios', {
+        'data_hora': DateTime.now().toIso8601String()
+      });
+
+      for (int i = 0; i < times.length; i++) {
+        int numeroTime = i + 1;
+        for (var jogador in times[i]) {
+          if (jogador.id != null) {
+            await txn.insert('sorteio_itens', {
+              'sorteio_id': sorteioId,
+              'jogador_id': jogador.id,
+              'numero_time': numeroTime
+            });
+          }
+        }
+      }
+    });
+    log("Sorteio salvo com sucesso!");
+  }
+
+  Future<List<List<Jogador>>?> recuperarUltimoSorteio() async {
+    final db = await database;
+
+    final sorteios = await db.query('sorteios', orderBy: 'id DESC', limit: 1);
+    if (sorteios.isEmpty) return null;
+
+    int sorteioId = sorteios.first['id'] as int;
+
+    final itens = await db.rawQuery('''
+      SELECT j.*, s.numero_time 
+      FROM sorteio_itens s
+      INNER JOIN jogadores j ON s.jogador_id = j.id
+      WHERE s.sorteio_id = ?
+      ORDER BY s.numero_time
+    ''', [sorteioId]);
+
+    Map<int, List<Jogador>> mapaTimes = {};
+    
+    for (var item in itens) {
+      int time = item['numero_time'] as int;
+      Jogador j = Jogador.fromMap(item);
+      
+      if (!mapaTimes.containsKey(time)) {
+        mapaTimes[time] = [];
+      }
+      mapaTimes[time]!.add(j);
+    }
+
+    return mapaTimes.values.toList();
   }
 
   Future<int> inserir(Jogador jogador) async {

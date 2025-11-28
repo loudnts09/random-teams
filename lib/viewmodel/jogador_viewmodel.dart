@@ -17,11 +17,63 @@ class JogadorViewModel extends ChangeNotifier {
   bool _carregando = false;
   bool get carregando => _carregando;
 
+  Future<void> carregarUltimoSorteio() async {
+    _carregando = true;
+    notifyListeners();
+    
+    final resultado = await _repository.recuperarUltimoSorteio();
+    if (resultado != null) {
+      _timesSorteados = resultado;
+    }
+    
+    _carregando = false;
+    notifyListeners();
+  }
+
+  Future<void> sortear(int numeroTimes) async {
+    if (_jogadores.isEmpty) return;
+
+    _carregando = true;
+    notifyListeners();
+
+    List<Jogador> pool = List.from(_jogadores);
+
+    pool.sort((a, b) => b.nivel.compareTo(a.nivel));
+
+    List<List<Jogador>> times = List.generate(numeroTimes, (_) => []);
+
+    // algoritmo Snake Draft (1, 2, 2, 1...)
+    for (int i = 0; i < pool.length; i++) {
+
+      int indiceTime;
+      int rodada = i ~/ numeroTimes;
+      
+      bool indo = rodada % 2 == 0;
+      if (indo) {
+        indiceTime = i % numeroTimes;
+      } else {
+        indiceTime = (numeroTimes - 1) - (i % numeroTimes);
+      }
+
+      times[indiceTime].add(pool[i]);
+    }
+
+    for(var time in times) time.shuffle();
+
+    _timesSorteados = times;
+
+    await _repository.salvarSorteio(_timesSorteados);
+
+    _carregando = false;
+    notifyListeners();
+  }
+
   void removerImagem(){
     imagemSelecionada = null;
     log("imagem removida com sucesso");
     notifyListeners();
   }
+
   void setImagemParaEdicao(String? caminhoFoto){
     if(caminhoFoto != null){
       imagemSelecionada = File(caminhoFoto);
