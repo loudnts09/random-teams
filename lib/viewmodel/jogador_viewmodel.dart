@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/rendering.dart';
+import 'dart:ui' as ui; // Import para manipulação de imagem
+import 'dart:typed_data'; // Import para bytes
+import 'package:share_plus/share_plus.dart'; // Import para compartilhar
+import 'package:path_provider/path_provider.dart'; // Import para salvar temp
 import 'dart:developer';
 import 'dart:io';
 import '../model/jogador.dart';
@@ -8,6 +13,12 @@ import '../repository/jogador_repository.dart';
 class JogadorViewModel extends ChangeNotifier {
   final JogadorRepository _repository = JogadorRepository();
   final picker = ImagePicker();
+  // 1. Chave global para identificar a área que será transformada em imagem
+  final GlobalKey globalKey = GlobalKey();
+  bool gerandoImagem = false; // Controle de loading para o botão de exportar
+
+  List<List<Jogador>> _timesSorteados = [];
+  List<List<Jogador>> get timesSorteados => _timesSorteados;
   
   File? imagemSelecionada;
 
@@ -177,5 +188,61 @@ class JogadorViewModel extends ChangeNotifier {
       
       await carregarJogadores();
     }
+  }
+
+  Future<File?> gerarImagemDoSorteio() async {
+    try {
+      gerandoImagem = true;
+      notifyListeners();
+      log("Iniciando captura da imagem...");
+
+      await Future.delayed(const Duration(milliseconds: 80));
+
+      RenderRepaintBoundary? boundary =
+          globalKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
+
+      if (boundary == null) {
+        log("Boundary NÃO encontrado. Tela não renderizada?");
+        gerandoImagem = false;
+        notifyListeners();
+        return null;
+      }
+
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+
+      Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/times_sorteados.png');
+
+      await file.writeAsBytes(pngBytes);
+
+      log("Imagem gerada em: ${file.path}");
+
+      return file;
+    } catch (e, s) {
+      log("Erro ao gerar imagem", error: e, stackTrace: s);
+      return null;
+    } finally {
+      gerandoImagem = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> compartilharImagem() async {
+    final file = await gerarImagemDoSorteio();
+    if (file == null) {
+      log("Não foi possível gerar a imagem para compartilhar");
+      return;
+    }
+
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      text: "Times sorteados!",
+    );
   }
 }

@@ -31,6 +31,14 @@ class AppTheme {
       backgroundColor: seedColor,
       foregroundColor: Colors.white,
     ),
+    
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: seedColor, // Fundo Azul
+        foregroundColor: Colors.white, // Letra Branca
+        iconColor: Colors.white, // Ícone Branco
+      ),
+    )
   );
 
   static final ThemeData darkTheme = ThemeData(
@@ -43,6 +51,8 @@ class AppTheme {
     ),
 
     appBarTheme: const AppBarTheme(
+      backgroundColor: seedColor, 
+      foregroundColor: Colors.white,
       centerTitle: false,
       elevation: 0,
     ),
@@ -51,5 +61,13 @@ class AppTheme {
       elevation: 2,
       margin: EdgeInsets.symmetric(vertical: 4, horizontal: 0),
     ),
+    
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: seedColor, // Fundo Azul
+        foregroundColor: Colors.white, // Letra Branca
+        iconColor: Colors.white, // Ícone Branco
+      ),
+    )
   );
 }

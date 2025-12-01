@@ -230,9 +230,6 @@ class _JogadoresViewState extends State<JogadoresView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gerenciar jogadores'),
-        centerTitle: false,
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -258,7 +255,9 @@ class _JogadoresViewState extends State<JogadoresView> {
                       final jogador = viewModel.jogadores[index];
                       return Card(
                         child: ListTile(
+                          minVerticalPadding: 25,
                           leading: CircleAvatar(
+                            radius: 39,
                             backgroundImage: jogador.foto != null ? FileImage(File(jogador.foto!)) : null,
                             child: jogador.foto == null ? const Icon(Icons.person) : null,
                           ),
