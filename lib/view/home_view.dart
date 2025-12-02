@@ -11,7 +11,7 @@ class HomeView extends StatelessWidget {
     log("HomeView build chamado");
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gerador de times'),
+        title: const Text('Gerenciador de times'),
       ),
       body: Center(
         child: Padding(
