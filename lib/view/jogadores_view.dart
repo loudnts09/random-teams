@@ -48,99 +48,101 @@ class _JogadoresViewState extends State<JogadoresView> {
             return AlertDialog(
               title: Text(
                   jogadorExistente == null ? 'Adicionar Jogador' : 'Editar Jogador'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Column(
-                    children: [
-                      GestureDetector(
-                        onTap: () async{
-                          await viewModel.selecionarImagem();
-                          setStateDialog(() {});
-                        },
-                        child: CircleAvatar(
-                          radius: 40,
-                          backgroundImage: viewModel.imagemSelecionada != null ? FileImage(viewModel.imagemSelecionada!) : null,
-                          child: viewModel.imagemSelecionada == null ? const Icon(Icons.camera_alt, size: 30) : null,
-                        ),
-                      ),
-                      if (viewModel.imagemSelecionada != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: TextButton.icon(
-                          onPressed: () {
-                            viewModel.removerImagem(); 
-                            setStateDialog(() {}); 
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () async{
+                            await viewModel.selecionarImagem();
+                            setStateDialog(() {});
                           },
-                          icon: const Icon(Icons.delete_outline, color: Colors.red),
-                          label: const Text(
-                            "Remover foto", 
-                            style: TextStyle(color: Colors.red),
-                          ),
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: const Size(50, 30),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          child: CircleAvatar(
+                            radius: 40,
+                            backgroundImage: viewModel.imagemSelecionada != null ? FileImage(viewModel.imagemSelecionada!) : null,
+                            child: viewModel.imagemSelecionada == null ? const Icon(Icons.camera_alt, size: 30) : null,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16,),
-                  TextField(
-                    controller: controller,
-                    decoration: const InputDecoration(
-                      labelText: 'Nome',
-                      border: OutlineInputBorder(),
+                        if (viewModel.imagemSelecionada != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: TextButton.icon(
+                            onPressed: () {
+                              viewModel.removerImagem(); 
+                              setStateDialog(() {}); 
+                            },
+                            icon: const Icon(Icons.delete_outline, color: Colors.red),
+                            label: const Text(
+                              "Remover foto", 
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: const Size(50, 30),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 14.0),
-                  ),
-                  Text('Definir nível do jogador: '),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        iconSize: 30,
-                        onPressed: () {
-                          if (_nivelJogador > 1) {
-                            setStateDialog(() {
-                              _nivelJogador--;
-                              log("decrementou _nivelJogador -> $_nivelJogador");
-                            });
-                          }
-                          else{ 
-                            log("tentativa de decrementar abaixo de 1 ignorada");
-                          }
-                        },
-                        icon: const Icon(Icons.remove),
+                    const SizedBox(height: 16,),
+                    TextField(
+                      controller: controller,
+                      decoration: const InputDecoration(
+                        labelText: 'Nome',
+                        border: OutlineInputBorder(),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16.0),
-                      ),
-                      Text('$_nivelJogador'),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 16.0),
-                      ),
-                      IconButton(
-                        iconSize: 30,
-                        onPressed: () {
-                          if(_nivelJogador < 5){
-                            setStateDialog(() {
-                              _nivelJogador++;
-                              log("incrementou _nivelJogador -> $_nivelJogador");
-                            });
-                          }
-                          else{ 
-                            log("tentativa de incrementar acima de 5 ignorada");
-                          }
-                        },
-                        icon: const Icon(Icons.add),
-                      ),
-                    ],
-                  )
-                ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 14.0),
+                    ),
+                    Text('Definir nível do jogador: '),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          iconSize: 30,
+                          onPressed: () {
+                            if (_nivelJogador > 1) {
+                              setStateDialog(() {
+                                _nivelJogador--;
+                                log("decrementou _nivelJogador -> $_nivelJogador");
+                              });
+                            }
+                            else{ 
+                              log("tentativa de decrementar abaixo de 1 ignorada");
+                            }
+                          },
+                          icon: const Icon(Icons.remove),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16.0),
+                        ),
+                        Text('$_nivelJogador'),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 16.0),
+                        ),
+                        IconButton(
+                          iconSize: 30,
+                          onPressed: () {
+                            if(_nivelJogador < 5){
+                              setStateDialog(() {
+                                _nivelJogador++;
+                                log("incrementou _nivelJogador -> $_nivelJogador");
+                              });
+                            }
+                            else{ 
+                              log("tentativa de incrementar acima de 5 ignorada");
+                            }
+                          },
+                          icon: const Icon(Icons.add),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
