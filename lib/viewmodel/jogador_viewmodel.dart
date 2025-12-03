@@ -28,6 +28,9 @@ class JogadorViewModel extends ChangeNotifier {
   bool _carregando = false;
   bool get carregando => _carregando;
 
+  List<Map<String, dynamic>> _historicoSorteios = [];
+  List<Map<String, dynamic>> get historicoSorteios => _historicoSorteios;
+
   Future<void> carregarUltimoSorteio() async {
     _carregando = true;
     notifyListeners();
@@ -69,7 +72,9 @@ class JogadorViewModel extends ChangeNotifier {
       times[indiceTime].add(pool[i]);
     }
 
-    for(var time in times) time.shuffle();
+    for(var time in times) {
+      time.shuffle();
+    }
 
     _timesSorteados = times;
 
@@ -99,9 +104,29 @@ class JogadorViewModel extends ChangeNotifier {
     final XFile? arquivo = await picker.pickImage(source: ImageSource.gallery);
 
     if(arquivo != null){
-      imagemSelecionada = File(arquivo.path);
-      log("Imagem selecionada: ${arquivo.path}"); 
-      notifyListeners();
+      try {
+        // Obter diretório de documentos persistente
+        final appDir = await getApplicationDocumentsDirectory();
+        final pastaFotos = Directory('${appDir.path}/fotos_jogadores');
+        
+        // Criar pasta se não existir
+        if (!await pastaFotos.exists()) {
+          await pastaFotos.create(recursive: true);
+          log("Pasta de fotos criada: ${pastaFotos.path}");
+        }
+
+        // Copiar arquivo para diretório persistente
+        final nomeArquivo = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final caminhoDestino = '${pastaFotos.path}/$nomeArquivo';
+        
+        await File(arquivo.path).copy(caminhoDestino);
+        imagemSelecionada = File(caminhoDestino);
+        
+        log("Imagem salva em: $caminhoDestino"); 
+        notifyListeners();
+      } catch (e, s) {
+        log("Erro ao salvar imagem", error: e, stackTrace: s);
+      }
     }
   }
 
@@ -244,5 +269,46 @@ class JogadorViewModel extends ChangeNotifier {
       [XFile(file.path)],
       text: "Times sorteados!",
     );
+  }
+
+  // Métodos para histórico de sorteios
+  Future<void> carregarHistoricoSorteios() async {
+    try {
+      _carregando = true;
+      notifyListeners();
+
+      _historicoSorteios = await _repository.listarHistoricoSorteios();
+      log("Histórico carregado: ${_historicoSorteios.length} sorteios");
+
+      _carregando = false;
+      notifyListeners();
+    } catch (e, s) {
+      log("Erro ao carregar histórico", error: e, stackTrace: s);
+      _carregando = false;
+      notifyListeners();
+    }
+  }
+
+  Future<List<List<Jogador>>?> recuperarSorteioDetalhado(int sorteioId) async {
+    try {
+      log("Recuperando detalhes do sorteio $sorteioId");
+      return await _repository.recuperarSorteioById(sorteioId);
+    } catch (e, s) {
+      log("Erro ao recuperar sorteio detalhado", error: e, stackTrace: s);
+      return null;
+    }
+  }
+
+  Future<void> deletarSorteioDoHistorico(int sorteioId) async {
+    try {
+      log("Deletando sorteio $sorteioId do histórico");
+      await _repository.deletarSorteio(sorteioId);
+      
+      _historicoSorteios.removeWhere((s) => s['id'] == sorteioId);
+      log("Sorteio deletado com sucesso");
+      notifyListeners();
+    } catch (e, s) {
+      log("Erro ao deletar sorteio", error: e, stackTrace: s);
+    }
   }
 }

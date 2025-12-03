@@ -27,7 +27,7 @@ class JogadorRepository {
 
       return await openDatabase(
         path,
-        version: 1,
+        version: 2,
         onCreate: (db, version) async {
           await db.execute('''
             CREATE TABLE jogadores (
@@ -39,6 +39,12 @@ class JogadorRepository {
           ''');
           await _criarTabelasSorteio(db);
         },
+        onUpgrade: (db, oldVersion, newVersion) async {
+          if (oldVersion < 2) {
+            log("Atualizando banco de dados para versão 2");
+            await _criarTabelasSorteio(db);
+          }
+        },
       );
     }
     catch(e, s){
@@ -49,14 +55,14 @@ class JogadorRepository {
 
   Future<void> _criarTabelasSorteio(Database db) async {
     await db.execute('''
-      CREATE TABLE sorteios (
+      CREATE TABLE IF NOT EXISTS sorteios (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         data_hora TEXT NOT NULL
       )
     ''');
 
     await db.execute('''
-      CREATE TABLE sorteio_itens (
+      CREATE TABLE IF NOT EXISTS sorteio_itens (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         sorteio_id INTEGER NOT NULL,
         jogador_id INTEGER NOT NULL,
@@ -182,6 +188,81 @@ class JogadorRepository {
     }
     catch(e, s){
       log("erro ao excluir jogador", error: e, stackTrace: s);
+      rethrow;
+    }
+  }
+
+  // Métodos para sorteios
+  Future<List<Map<String, dynamic>>> listarHistoricoSorteios() async {
+    try {
+      log("consultando histórico de sorteios");
+      final db = await database;
+      final sorteios = await db.query(
+        'sorteios',
+        orderBy: 'id DESC',
+      );
+      log("sorteios encontrados: ${sorteios.length}");
+      return sorteios;
+    } catch (e, s) {
+      log("erro ao listar histórico de sorteios", error: e, stackTrace: s);
+      rethrow;
+    }
+  }
+
+  Future<List<List<Jogador>>> recuperarSorteioById(int sorteioId) async {
+    try {
+      log("recuperando sorteio id=$sorteioId");
+      final db = await database;
+
+      final itens = await db.rawQuery('''
+        SELECT j.*, s.numero_time 
+        FROM sorteio_itens s
+        INNER JOIN jogadores j ON s.jogador_id = j.id
+        WHERE s.sorteio_id = ?
+        ORDER BY s.numero_time
+      ''', [sorteioId]);
+
+      Map<int, List<Jogador>> mapaTimes = {};
+      
+      for (var item in itens) {
+        int time = item['numero_time'] as int;
+        Jogador j = Jogador.fromMap(item);
+        
+        if (!mapaTimes.containsKey(time)) {
+          mapaTimes[time] = [];
+        }
+        mapaTimes[time]!.add(j);
+      }
+
+      return mapaTimes.values.toList();
+    } catch (e, s) {
+      log("erro ao recuperar sorteio", error: e, stackTrace: s);
+      rethrow;
+    }
+  }
+
+  Future<void> deletarSorteio(int sorteioId) async {
+    try {
+      log("deletando sorteio id=$sorteioId");
+      final db = await database;
+      
+      await db.transaction((txn) async {
+        await txn.delete(
+          'sorteio_itens',
+          where: 'sorteio_id = ?',
+          whereArgs: [sorteioId],
+        );
+        
+        await txn.delete(
+          'sorteios',
+          where: 'id = ?',
+          whereArgs: [sorteioId],
+        );
+      });
+
+      log("sorteio $sorteioId deletado com sucesso");
+    } catch (e, s) {
+      log("erro ao deletar sorteio", error: e, stackTrace: s);
       rethrow;
     }
   }
