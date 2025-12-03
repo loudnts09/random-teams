@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart'; // Import para compartilhar
 import 'package:path_provider/path_provider.dart'; // Import para salvar temp
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math' hide log;
 import '../model/jogador.dart';
 import '../repository/jogador_repository.dart';
 
@@ -52,12 +53,32 @@ class JogadorViewModel extends ChangeNotifier {
 
     List<Jogador> pool = List.from(_jogadores);
 
-    pool.sort((a, b) => b.nivel.compareTo(a.nivel));
+    // Agrupa jogadores por nível
+    Map<int, List<Jogador>> jogadoresPorNivel = {};
+    for (var jogador in pool) {
+      if (!jogadoresPorNivel.containsKey(jogador.nivel)) {
+        jogadoresPorNivel[jogador.nivel] = [];
+      }
+      jogadoresPorNivel[jogador.nivel]!.add(jogador);
+    }
+
+    // Embaralha jogadores dentro de cada nível para permitir permutação
+    final random = Random();
+    for (var nivel in jogadoresPorNivel.keys) {
+      jogadoresPorNivel[nivel]!.shuffle(random);
+    }
+
+    // Reconstrói a lista ordenada por nível, mas com jogadores embaralhados dentro de cada nível
+    List<Jogador> poolEmbaralhado = [];
+    List<int> niveisOrdenados = jogadoresPorNivel.keys.toList()..sort((a, b) => b.compareTo(a));
+    for (var nivel in niveisOrdenados) {
+      poolEmbaralhado.addAll(jogadoresPorNivel[nivel]!);
+    }
 
     List<List<Jogador>> times = List.generate(numeroTimes, (_) => []);
 
     // algoritmo Snake Draft (1, 2, 2, 1...)
-    for (int i = 0; i < pool.length; i++) {
+    for (int i = 0; i < poolEmbaralhado.length; i++) {
 
       int indiceTime;
       int rodada = i ~/ numeroTimes;
@@ -69,11 +90,12 @@ class JogadorViewModel extends ChangeNotifier {
         indiceTime = (numeroTimes - 1) - (i % numeroTimes);
       }
 
-      times[indiceTime].add(pool[i]);
+      times[indiceTime].add(poolEmbaralhado[i]);
     }
 
-    for(var time in times) {
-      time.shuffle();
+    // Embaralha jogadores dentro de cada time para maior aleatoriedade visual
+    for (var time in times) {
+      time.shuffle(random);
     }
 
     _timesSorteados = times;
