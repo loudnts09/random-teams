@@ -25,7 +25,6 @@ Aplicativo desenvolvido em Flutter para gerenciar jogadores e sortear times equi
 - [Algoritmo de Sorteio](#-algoritmo-de-sorteio)
 - [Plataformas Suportadas](#-plataformas-suportadas)
 - [Contribuindo](#-contribuindo)
-- [Licença](#-licença)
 
 ---
 
